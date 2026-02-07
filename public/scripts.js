@@ -28,11 +28,13 @@ const attributeName = [
 // Chat suggestions
 const chipSuggestions = [
   "What currency does this country use?",
-  "What language is spoken here?",
-  "Is this country expensive to live in?",
-  "Tell me one interesting historical fact",
+  "Share the detailed economic outlook.",
+  "How this country has changed compared to 1970s?",
+  "What are some future predictions about this country?",
   "What are the top tourist attractions?"
 ];
+
+const chatbotErrorMsg = 'Error accessing chatbot now, please try again later!';
 
 const chatInput = document.getElementById("chat-input");
 const suggestionsContainer = document.getElementById("chat-suggestions");
@@ -380,8 +382,6 @@ function handleButtonClick(selectedCountry, selectedYear) {
 
     Promise.all([getDataPromise, runFunctionPromise])
         .then(([data, aiData]) => {
-            // console.log("Data from getData:", data);
-            // console.log("Data from getDataFromAI:", aiData);
             if (aiData && aiData.error) {
                 throw new Error(aiData.error);
             }
@@ -400,7 +400,7 @@ function handleButtonClick(selectedCountry, selectedYear) {
         })
         .catch(error => {
             console.error("An error occurred:", error);
-            document.getElementById("ai-response").innerHTML = "Error fetching data from AI for the selected country. Please try again!";
+            document.getElementById("ai-response").innerHTML = "Error fetching data for " + countryName + ". Please try again!";
         });
 
     document.getElementById("ai-know-more").innerHTML = `Want to know more about ${countryName}? Check out the chatbot below!`;
@@ -505,20 +505,25 @@ async function sendChatMessage() {
       })
     });
 
-    const aiReply = await response.json();;
+    const aiReply = await response.json();
+
+    if (aiReply == '' || aiReply == null || typeof aiReply == 'object') {
+        appendChatBubble("assistant", chatbotErrorMsg);
+    } else {
+        appendChatBubble("assistant", aiReply);
+
+        chatHistory.push({ role: "user", content: userInput });
+        chatHistory.push({ role: "assistant", content: aiReply });
+    }
 
     removeChatLoader();
-    appendChatBubble("assistant", aiReply);
-
-    chatHistory.push({ role: "user", content: userInput });
-    chatHistory.push({ role: "assistant", content: aiReply });
 
     renderChatSuggestions();
 
   } catch (err) {
     console.error(err);
     removeChatLoader();
-    appendChatBubble("assistant", "Something went wrong. Try again.");
+    appendChatBubble("assistant", "Something went wrong. Please try again!");
   }
 }
 
@@ -543,7 +548,7 @@ function renderChatSuggestions() {
 
 // Function to send suggestion message to backend
 async function sendChipMessage(text) {
-  if (!text || !currentChatCountry) return;
+  if (!text) return;
 
   appendChatBubble("user", text);
   showChatLoader();
@@ -561,18 +566,23 @@ async function sendChipMessage(text) {
 
     const aiReply = await response.json();
 
-    removeChatLoader();
-    appendChatBubble("assistant", aiReply);
+    if (aiReply == '' || aiReply == null || typeof aiReply == 'object') {
+        appendChatBubble("assistant", chatbotErrorMsg);
+    } else {
+        appendChatBubble("assistant", aiReply);
 
-    chatHistory.push({ role: "user", content: text });
-    chatHistory.push({ role: "assistant", content: aiReply });
+        chatHistory.push({ role: "user", content: text });
+        chatHistory.push({ role: "assistant", content: aiReply });
+    }
+
+    removeChatLoader();
 
     renderChatSuggestions();
 
   } catch (err) {
     console.error(err);
     removeChatLoader();
-    appendChatBubble("assistant", "Something went wrong. Try again.");
+    appendChatBubble("assistant", "Something went wrong. Please try again!");
   }
 }
 

@@ -37,7 +37,7 @@ app.post('/chat-function', async (req, res) => {
         res.json(aiData);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'Run function failed' });
+        res.status(500).json({ error: 'Chat function failed' });
     }
 });
 
