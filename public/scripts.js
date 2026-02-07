@@ -651,7 +651,7 @@ async function handleSendEmailClick(name, email, message) {
         const result = await response.json();
 
         if (response.ok && result.success) {
-            alert('Email sent successfully');
+            alert('Email sent successfully!');
         } else {
             alert(result.message || 'Mail cannot be sent right now, please try later!');
         }
