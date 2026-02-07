@@ -48,5 +48,6 @@ Built as a lightweight, bootstrap-friendly project with a focus on clarity, UX, 
 4. Create .env file in root
 5. Add these secrets into your .env: PORT=5050, API_KEY, MAIL_ID, MAIL_PWD
 6. Create an API key on Groq (https://console.groq.com/home) and add it into your .env
-7. In .env add your google (or other) mail id, and your app password. Create your own app password for your mail ID via Googles's App Passwords
+7. In .env, add your google (or other) mail ID.
+8. For RESEND_API_KEY, go to Resend (https://resend.com) and create an API key for your mail ID.
 8. Run the app: "npm run dev", it will be available at "http://localhost:5050"

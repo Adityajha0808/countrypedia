@@ -648,15 +648,17 @@ async function handleSendEmailClick(name, email, message) {
             body: JSON.stringify(data)
         });
 
-        if (response.ok) {
+        const result = await response.json();
+
+        if (response.ok && result.success) {
             alert('Email sent successfully');
         } else {
-            alert('Error sending email. Please try again!');
+            alert(result.message || 'Mail cannot be sent right now, please try later!');
         }
         sendEmailButton.innerHTML = 'Send';
     } catch (error) {
-        // console.error('Error sending email:', error);
-        alert('Error sending email. Please try again!');
+        alert('Mail cannot be sent right now, please try later!');
+        sendEmailButton.innerHTML = 'Send';
     }
 }
 

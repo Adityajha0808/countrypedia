@@ -1,28 +1,41 @@
 require('dotenv').config({ path: __dirname + '/../.env' });
 
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 function sendMail(name, email, message) {
-    return new Promise((resolve, reject) => {
-        const transporter = nodemailer.createTransport({
-            service: 'Gmail',
-            auth: {
-                user: process.env.MAIL_ID,
-                pass: process.env.MAIL_PWD
+    return new Promise(async (resolve, reject) => {
+
+        const timeout = setTimeout(() => {
+            reject(new Error("MAIL_TIMEOUT"));
+        }, 30000);
+
+        try {
+            const result = await resend.emails.send({
+                from: 'Countrypedia <onboarding@resend.dev>',
+                to: [process.env.MAIL_ID],
+                subject: `Email request from ${name} (${email})`,
+                html: `
+                    <h3>New Contact Request</h3>
+                    <p><strong>Name:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Message:</strong></p>
+                    <p>${message}</p>
+                `
+            });
+
+            clearTimeout(timeout);
+
+            if (!result || result.error || !result.data?.id) {
+                return reject(new Error("MAIL_API_FAILED"));
             }
-        });
 
-        const mailOptions = {
-            from: email,
-            to: process.env.MAIL_ID,
-            subject: `Email request from ${name} (${email})`,
-            text: message
-        };
+            resolve(result);
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) reject(error);
-            else resolve(info);
-        });
+        } catch (err) {
+            clearTimeout(timeout);
+            reject(err);
+        }
     });
 }
 

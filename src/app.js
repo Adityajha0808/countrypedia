@@ -45,10 +45,25 @@ app.post('/send-email', async (req, res) => {
     try {
         const { name, email, message } = req.body;
         await sendMail(name, email, message);
-        res.send('Email sent successfully');
+
+        return res.status(200).json({
+            success: true
+        });
+
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error sending email');
+        console.error("Mail error:", err.message || err);
+
+        if (err.message === "MAIL_TIMEOUT") {
+            return res.status(504).json({
+                success: false,
+                message: "Mail couldn't be send, please try again!"
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Mail cannot be sent right now, please try later!"
+        });
     }
 });
 
